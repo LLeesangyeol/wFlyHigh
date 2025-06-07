@@ -1,0 +1,26 @@
+aws 기반 게시판 개발 일지 1회차
+
+DB 설계
+
+1. 테이블 설계 초안 작성
+  - users, posts, comments, files 테이블에 대한 표준화를 구글스프레드시트에 작성
+  - 각 컬럼 정의 및 제약 조건 설정
+
+2. 로컬호스트 oracle 설정
+   - cmd 에서 sqlplus / as sydba로 db 진입
+   - show con_name;으로 결과가 CDB$ROOT면 안 되고, PDB (예 : XEPDB1)로 들어가야 함
+     (1) show con_name;  // 접속 상태 확인
+     (2) shopw pdbs  // pdb 목록 확인
+     (3) alter session set container = XEPDB1; // pdb로 전환
+   - create user user_name identified by pw;
+     grant connect, resource to user_name;
+     으로 사용자 생성
+
+3. oracle 데이터베이스 접속
+
+  - 생성한 사용자 이름과 비밀번호 기입
+  - 세부정보에 서비스 이름을 체크 후 XEPDB1 기입
+
+// 생성한 사용자 확인법
+// SELECT username, account_status FROM dba_users WHERE username = 'USER_NAME';
+
