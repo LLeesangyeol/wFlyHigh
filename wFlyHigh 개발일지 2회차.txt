@@ -1,0 +1,193 @@
+aws 기반 게시판 개발 일지 2회차
+
+DB 설계 및 spring tool연동
+
+1. 엑셀 db 표준화 기반으로 create table users, posts, comments, file 구문 작성
+
+2. spring boot 프로젝트 생성
+
+	a. spring initializr 웹사이트에 접속
+	b. project : maven project, language : java, dependencies : spring web, spring data jpa, oracle driver
+	로 다운로드
+
+3. 다운받은 파일을 spring tool suite를 켜서 마우스 우클릭 -> run as -> maven install로 설치
+	a. 설치에 실패시 원인
+		i. application.properties 설정 오류
+		ii. oracle 서버가 꺼져 있음
+		iii. entity 클래스에 문제
+		iiii. demoapplicationtests 클래스 자체 삭제
+		등등의 원인이 있는데 다 해보니까 설치가 됐음
+
+
+https://positive-impactor.tistory.com/119 <- 참조 사이트
+
+4. maven 의존성 추가
+
+	위치는 pom.xml 안에 있음
+	pom.xml을 열고 dependency 추가
+
+	a. 오라클 버전 확인법 : 오라클 열고 SELECT * FROM v$version; 라고 치면 나옴
+	<dependency>
+  <groupId>com.oracle.database.jdbc</groupId>
+  <artifactId>ojdbc11</artifactId>
+  <version>21.9.0.0</version>
+</dependency>
+
+
+demo 우클릭 -> run as -> spring boot app을 통해서 데이터베이스 연동.
+
+근데 아무리 오류를 수정할려고 해도 수정이 안 된다... 사실 3~4일차인데도 오류 해결이 안됨
+시험 끝나고 이 오류를 수정하고 본격적인 작업에 돌입 할 예정
+
+
+
+
+
+
+
+5.  Spring Boot 서버 여는 방법
+✅ 1. 프로젝트 열기
+File > Import > Maven > Existing Maven Projects
+
+다운로드받은 Spring Initializr 프로젝트를 선택
+
+✅ 2. 메인 클래스 실행
+src/main/java 하위에 있는 DemoApplication.java 또는 BoardApplication.java 클래스에서
+
+우클릭 → Run As > Spring Boot App
+
+또는 위쪽에 초록색 ▶️ 버튼 클릭
+
+🔥 실행 성공 메시지 예시
+터미널 하단에 아래 메시지가 뜨면 성공이옵니다:
+
+scss
+복사
+편집
+Tomcat started on port(s): 8080 (http)
+Started DemoApplication in 2.345 seconds
+브라우저에서 http://localhost:8080 접속 가능
+
+⚠️ 문제가 발생한다면
+application.properties에서 DB 설정이 빠졌거나Oracle DB가 꺼져 있거나 의존성 다운로드가 
+안 됐거나 포트 충돌 발생 시
+
+1. Spring Boot 프로젝트 생성 🏗
+위치: Spring Initializr (https://start.spring.io)
+
+내용:
+
+Project: Maven 또는 Gradle
+
+Language: Java
+
+Spring Boot 버전: 최신 안정 버전
+
+Group: 예를 들어 com.example
+
+Artifact: 예를 들어 demo
+
+Dependencies: Spring Web, Spring Data JPA, Oracle Driver 
+positive-impactor.tistory.com
+
+2. Oracle JDBC 드라이버 의존성 추가
+위치: pom.xml (Maven 프로젝트)
+
+코드 예시:
+
+xml
+복사
+편집
+<dependency>
+  <groupId>com.oracle.database.jdbc</groupId>
+  <artifactId>ojdbc8</artifactId>
+  <version>19.8.0.0</version>
+</dependency>
+(Oracle 버전에 따라 버전을 맞춰 추가하세요.)
+
+3. DB 연결 설정
+위치: src/main/resources/application.properties
+
+설정 내용:
+
+ini
+복사
+편집
+spring.datasource.url=jdbc:oracle:thin:@localhost:1521:XE
+spring.datasource.username=your_username
+spring.datasource.password=your_password
+spring.datasource.driver-class-name=oracle.jdbc.OracleDriver
+spring.jpa.database-platform=org.hibernate.dialect.Oracle12cDialect
+(DB URL, 사용자명, 비밀번호, 드라이버명 등을 실제 환경에 맞춰 수정) 
+positive-impactor.tistory.com
+
+4. DB 접속 상태 확인
+위치: 프로젝트 실행 시 콘솔
+
+확인 포인트:
+
+Console 로그에 데이터베이스 연결 성공 여부 확인
+
+예외 메시지(BadSqlGrammarException 등) 발생 시 application.properties 설정값, Oracle 실행 여부, 네트워크 연결 확인 
+positive-impactor.tistory.com
+
+5. JPA Entity 클래스 작성
+위치: src/main/java/com/example/demo/model/User.java
+
+예시 코드:
+
+java
+복사
+편집
+@Entity
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String username;
+    private String password;
+    // getters and setters
+}
+``` :contentReference[oaicite:19]{index=19}
+6. Repository 인터페이스 작성
+위치: src/main/java/com/example/demo/repository/UserRepository.java
+
+예시 코드:
+
+java
+복사
+편집
+public interface UserRepository extends JpaRepository<User, Long> {
+    // 추가 쿼리 메소드 선언 가능
+}
+``` :contentReference[oaicite:21]{index=21}
+7. Service 및 Controller 구현
+Service 위치: src/main/java/com/example/demo/service/UserService.java
+
+CRUD 메소드 (getAllUsers(), getUserById(id), saveUser(user), deleteUser(id)) 구현 
+positive-impactor.tistory.com
+
+Controller 위치: src/main/java/com/example/demo/controller/UserController.java
+
+REST 엔드포인트 (/users) GET, POST, DELETE 요청 처리
+
+8. 예외 처리 및 디버깅 가이드
+위치: 콘솔 및 application.properties
+
+주요 상황:
+
+ORA‑12154: DB URL이나 TNS 설정 문제 → application.properties 값 및 Oracle 서비스 상태 확인
+
+BadSqlGrammarException: Entity 필드 vs DB 컬럼 불일치 → Entity와 실제 DB 스키마 비교, SQL 로그 설정 후 확인 
+positive-impactor.tistory.com
+
+✅ 요약 테이블
+단계	작업	파일/위치
+1	Spring Boot 프로젝트 생성	start.spring.io
+2	Oracle JDBC 의존성 추가	pom.xml
+3	DB 연결 설정	application.properties
+4	DB 접속 테스트	콘솔 실행 로그
+5	JPA Entity 클래스 작성	model/User.java
+6	Repository 작성	repository/UserRepository.java
+7	Service + Controller 구현	service/, controller/
+8	예외 처리/디버깅	콘솔, 설정 파일
